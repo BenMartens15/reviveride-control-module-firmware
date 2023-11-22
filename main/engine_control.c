@@ -15,9 +15,9 @@
 #define IGNITION_RELAY_PIN 26
 #define ACCESSORY_RELAY_PIN 25
 
-#define RELAY_GPIO_MASK ((1 << START_RELAY_PIN) | \
-                        (1 << IGNITION_RELAY_PIN) | \
-                        (1 << ACCESSORY_RELAY_PIN))
+#define RELAY_GPIO_MASK ((1ULL << START_RELAY_PIN) | \
+                        (1ULL << IGNITION_RELAY_PIN) | \
+                        (1ULL << ACCESSORY_RELAY_PIN))
 /******************************************************************************/
 
 /* ENUMS **********************************************************************/
