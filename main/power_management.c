@@ -80,6 +80,16 @@ void power_management_init(void)
 
     gpio_config(&output_config);
 
+    // disable all power relays on startup
+    gpio_set_level(HEAD_UNIT_EN_PIN, 1);
+    gpio_set_level(BLIND_SPOT_L_EN_PIN, 1);
+    gpio_set_level(BLIND_SPOT_R_EN_PIN, 1);
+    gpio_set_level(DASH_CAM_EN_PIN, 1);
+    gpio_set_level(BACKUP_CAM_EN_PIN, 1);
+
+    gpio_set_pull_mode(HEAD_UNIT_SHUTDOWN_PIN, GPIO_PULLUP_ONLY);
+    gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 1); // head unit shutdown pin is active-low, so set it to high by default
+
     m_acc_semaphore = xSemaphoreCreateBinary();
     xTaskCreate(accessory_task, "accessory_task", 2048, NULL, 10, NULL); // task to handle changes on the accessory sense pin
 
@@ -143,11 +153,11 @@ static void power_on_system(void)
         xTimerStop(m_shutdown_delay, 0);
     }
 
-    gpio_set_level(HEAD_UNIT_EN_PIN, 1);
-    gpio_set_level(DASH_CAM_EN_PIN, 1);
-    gpio_set_level(BLIND_SPOT_L_EN_PIN, 1);
-    gpio_set_level(BLIND_SPOT_R_EN_PIN, 1);
-    gpio_set_level(BACKUP_CAM_EN_PIN, 1);
+    gpio_set_level(HEAD_UNIT_EN_PIN, 0);
+    gpio_set_level(DASH_CAM_EN_PIN, 0);
+    gpio_set_level(BLIND_SPOT_L_EN_PIN, 0);
+    gpio_set_level(BLIND_SPOT_R_EN_PIN, 0);
+    gpio_set_level(BACKUP_CAM_EN_PIN, 0);
 }
 
 static void power_off_system(void)
@@ -156,15 +166,16 @@ static void power_off_system(void)
     // is cut immediately. For the head unit and dash cam, they need some time
     // to shut down properly, so a shutoff signal is sent to them, and then
     // there is a delay before power is cut.
-    gpio_set_level(BLIND_SPOT_L_EN_PIN, 0);
-    gpio_set_level(BLIND_SPOT_R_EN_PIN, 0);
-    gpio_set_level(BACKUP_CAM_EN_PIN, 0);
+    gpio_set_level(BLIND_SPOT_L_EN_PIN, 1);
+    gpio_set_level(BLIND_SPOT_R_EN_PIN, 1);
+    gpio_set_level(BACKUP_CAM_EN_PIN, 1);
 
-    gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 1);
-    gpio_set_level(DASH_CAM_SHUTDOWN_PIN, 1);
-    vTaskDelay(pdMS_TO_TICKS(100));
-    gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 0);
+    // send a shutdown signal to the dash cam an head unit to start the shutdown process
+    gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 1); // head unit shutdown pin is active-low
     gpio_set_level(DASH_CAM_SHUTDOWN_PIN, 0);
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 0);
+    gpio_set_level(DASH_CAM_SHUTDOWN_PIN, 1);
 
     xTimerStart(m_shutdown_delay, 0); // start the timer to delay the shutdown of the head unit and dash cam
 }
@@ -172,7 +183,7 @@ static void power_off_system(void)
 static void delayed_power_off(TimerHandle_t xTimer)
 {
     ESP_LOGI(TAG, "Shutdown delay expired - disabling power to head unit and dash cam");
-    gpio_set_level(HEAD_UNIT_EN_PIN, 0);
-    gpio_set_level(DASH_CAM_EN_PIN, 0);
+    gpio_set_level(HEAD_UNIT_EN_PIN, 1);
+    gpio_set_level(DASH_CAM_EN_PIN, 1);
 }
 /******************************************************************************/
