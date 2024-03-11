@@ -11,13 +11,13 @@
 #define TAG "ENGINE_CONTROL"
 #define ENGINE_CONTROL_LOG_LEVEL ESP_LOG_INFO
 
-#define START_RELAY_PIN 27
-#define IGNITION_RELAY_PIN 26
-#define ACCESSORY_RELAY_PIN 25
+#define STARTER_EN_PIN 47
+#define IGNITION1_EN_PIN 1
+#define ASSESSORY1_EN_PIN 38
 
-#define RELAY_GPIO_MASK ((1ULL << START_RELAY_PIN) | \
-                        (1ULL << IGNITION_RELAY_PIN) | \
-                        (1ULL << ACCESSORY_RELAY_PIN))
+#define RELAY_GPIO_MASK ((1ULL << STARTER_EN_PIN) | \
+                        (1ULL << IGNITION1_EN_PIN) | \
+                        (1ULL << ASSESSORY1_EN_PIN))
 /******************************************************************************/
 
 /* ENUMS **********************************************************************/
@@ -50,9 +50,9 @@ void engine_control_init(void)
     
     gpio_config(&io_config);
 
-    gpio_set_level(START_RELAY_PIN, 1);
-    gpio_set_level(IGNITION_RELAY_PIN, 1);
-    gpio_set_level(ACCESSORY_RELAY_PIN, 1);
+    gpio_set_level(STARTER_EN_PIN, 0);
+    gpio_set_level(IGNITION1_EN_PIN, 0);
+    gpio_set_level(ASSESSORY1_EN_PIN, 0);
 
     ESP_LOGI(TAG, "Engine control initialized");
 }
@@ -72,14 +72,14 @@ void engine_control_start_engine(void)
 
     m_engine_state = RUNNING;
 
-    gpio_set_level(IGNITION_RELAY_PIN, 0); // turn ignition relay on
-    gpio_set_level(ACCESSORY_RELAY_PIN, 0); // turn accessory relay on
+    gpio_set_level(IGNITION1_EN_PIN, 1); // turn ignition switch on
+    gpio_set_level(ASSESSORY1_EN_PIN, 1); // turn accessory switch on
     vTaskDelay(pdMS_TO_TICKS(500));
 
-    // turn on starter relay for 2 seconds, then back off
-    gpio_set_level(START_RELAY_PIN, 0);
+    // turn on starter switch for 2 seconds, then back off
+    gpio_set_level(STARTER_EN_PIN, 1);
     vTaskDelay(pdMS_TO_TICKS(2000));
-    gpio_set_level(START_RELAY_PIN, 1);
+    gpio_set_level(STARTER_EN_PIN, 0);
 }
 
 void engine_control_stop_engine(void)
@@ -88,8 +88,8 @@ void engine_control_stop_engine(void)
 
     m_engine_state = OFF;
 
-    gpio_set_level(IGNITION_RELAY_PIN, 1); // turn ignition relay off
-    gpio_set_level(ACCESSORY_RELAY_PIN, 1); // turn accessory relay off
+    gpio_set_level(IGNITION1_EN_PIN, 0); // turn ignition switch off
+    gpio_set_level(ASSESSORY1_EN_PIN, 0); // turn accessory switch off
 }
 /******************************************************************************/ 
 
