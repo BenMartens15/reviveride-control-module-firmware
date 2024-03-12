@@ -1,6 +1,5 @@
 # Project files
 build/
-sdkconfig
 sdkconfig.old
 
 # .vscode folder
