@@ -6,6 +6,7 @@
 #include "freertos/semphr.h"
 #include "freertos/task.h"
 #include "freertos/timers.h"
+#include "led.h"
 /******************************************************************************/
 
 /* DEFINES ********************************************************************/
@@ -138,9 +139,11 @@ static void accessory_task(void* arg)
 
         if ((pin_history & 0b0000000000001111) == 0b0000000000000000) { // pin low
             ESP_LOGI(TAG, "Accessory off");
+            led_off(); // turn off the accessory LED
             power_off_system();
         } else if((pin_history & 0b0000000000001111) == 0b0000000000001111) { // pin high
             ESP_LOGI(TAG, "Accessory on");
+            led_on(); // turn on the accessory LED
             power_on_system();
         }
         gpio_intr_enable(ACCESSORY_SENSE_PIN);
@@ -153,6 +156,7 @@ static void power_on_system(void)
         xTimerStop(m_shutdown_delay, 0);
     }
 
+    // turn on all the power outputs
     gpio_set_level(HEAD_UNIT_EN_PIN, 0);
     gpio_set_level(DASH_CAM_EN_PIN, 0);
     gpio_set_level(BLIND_SPOT_L_EN_PIN, 0);
