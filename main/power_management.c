@@ -88,7 +88,6 @@ void power_management_init(void)
     gpio_set_level(DASH_CAM_EN_PIN, 1);
     gpio_set_level(BACKUP_CAM_EN_PIN, 1);
 
-    gpio_set_pull_mode(HEAD_UNIT_SHUTDOWN_PIN, GPIO_PULLUP_ONLY);
     gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 1); // head unit shutdown pin is active-low, so set it to high by default
 
     m_acc_semaphore = xSemaphoreCreateBinary();
@@ -174,12 +173,12 @@ static void power_off_system(void)
     gpio_set_level(BLIND_SPOT_R_EN_PIN, 1);
     gpio_set_level(BACKUP_CAM_EN_PIN, 1);
 
-    // send a shutdown signal to the dash cam an head unit to start the shutdown process
-    gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 1); // head unit shutdown pin is active-low
-    gpio_set_level(DASH_CAM_SHUTDOWN_PIN, 0);
-    vTaskDelay(pdMS_TO_TICKS(2000));
-    gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 0);
+    // send a shutdown signal to the dash cam and head unit to start the shutdown process
+    gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 0); // head unit shutdown pin is active-low
     gpio_set_level(DASH_CAM_SHUTDOWN_PIN, 1);
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    gpio_set_level(HEAD_UNIT_SHUTDOWN_PIN, 1);
+    gpio_set_level(DASH_CAM_SHUTDOWN_PIN, 0);
 
     xTimerStart(m_shutdown_delay, 0); // start the timer to delay the shutdown of the head unit and dash cam
 }
