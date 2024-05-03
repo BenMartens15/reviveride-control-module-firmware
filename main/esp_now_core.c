@@ -76,12 +76,6 @@ static void packet_received_cb(const esp_now_recv_info_t *recv_info, const uint8
     uint8_t * mac_addr = recv_info->src_addr;
 
     ESP_LOGI(TAG, "%d bytes incoming from "MACSTR" ", len, MAC2STR(mac_addr));
-    
-    if(len != sizeof(engine_state_e))
-    {
-        ESP_LOGE(TAG, "Unexpected data length: %d != %u", len, sizeof(engine_state_e));
-        return;
-    }
 
     memcpy(&recv_packet.sender_mac_addr, mac_addr, sizeof(recv_packet.sender_mac_addr));
     memcpy(&recv_packet.command, data, len);
