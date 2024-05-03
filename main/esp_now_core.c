@@ -98,12 +98,17 @@ static void process_receive_queue_task(void *p)
     ESP_LOGI(TAG, "Waiting for data from key fob");
     for(;;)
     {
-        if(xQueueReceive(m_receive_queue, &recv_packet, portMAX_DELAY) != pdTRUE)
+        if(xQueueReceive(m_receive_queue, &recv_packet, portMAX_DELAY) == pdTRUE)
         {
-            continue;
+            switch(recv_packet.command) {
+                case TOGGLE_ENGINE_STATE_COMMAND:
+                    ESP_LOGI(TAG, "Command received: TOGGLE_ENGINE_STATE_COMMAND");
+                    engine_control_toggle_engine_state();
+                    break;
+                default:
+                    ESP_LOGE(TAG, "Unrecognized command received");
+            }
         }
-
-        engine_control_toggle_engine_state();
     }
 }
 /******************************************************************************/
