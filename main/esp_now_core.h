@@ -20,7 +20,7 @@
 /* STRUCTURES *****************************************************************/
 typedef struct {
     uint8_t sender_mac_addr[ESP_NOW_ETH_ALEN];
-    uint8_t command;
+    int command;
 } recv_packet_t;
 /******************************************************************************/
 

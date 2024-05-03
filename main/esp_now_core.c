@@ -84,7 +84,7 @@ static void packet_received_cb(const esp_now_recv_info_t *recv_info, const uint8
     }
 
     memcpy(&recv_packet.sender_mac_addr, mac_addr, sizeof(recv_packet.sender_mac_addr));
-    memcpy(&recv_packet.data, data, len);
+    memcpy(&recv_packet.command, data, len);
     if (xQueueSend(m_receive_queue, &recv_packet, 0) != pdTRUE) {
         ESP_LOGW(TAG, "Receive queue full - packet discarded");
         return;
