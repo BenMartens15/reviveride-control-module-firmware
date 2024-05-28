@@ -1,0 +1,6 @@
+# Project files
+build/
+sdkconfig.old
+
+# .vscode folder
+**/.vscode
